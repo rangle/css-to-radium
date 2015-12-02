@@ -12,6 +12,14 @@ var sanitizeSelector = function (selector) {
           .replace(/^\./, '');
 };
 
+var normalizeSelector = function (selector) {
+  return selector.split(',')
+          .map(function (part) {
+            return camelCase(part);
+          })
+          .join(',');
+};
+
 var sanitizeValue = function (value) {
   return sanitize(value);
 };
@@ -58,7 +66,7 @@ var convertDecl = function (decl) {
 
 var convertRule = function (rule) {
   var returnObj = {};
-  var selector = sanitizeSelector(rule.selector);
+  var selector = normalizeSelector(sanitizeSelector(rule.selector));
 
   returnObj[selector] = _.transform(rule.nodes, function (convertedDecls, decl) {
     if (decl.type === 'decl') {
