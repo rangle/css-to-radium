@@ -2,8 +2,18 @@ var _ = require('lodash');
 var postcss = require('postcss');
 var camelCase = require('camelcase');
 
-var sanitize = function (selector) {
-  return selector.replace(/\n/gi, ' ');
+var sanitize = function (str) {
+  return str.replace(/\n/gi, ' ');
+};
+
+var sanitizeSelector = function (selector) {
+  return sanitize(selector)
+          // Remove CSS class selector 'dot'
+          .replace(/^\./, '');
+};
+
+var sanitizeValue = function (value) {
+  return sanitize(value);
 };
 
 var convertValue = function (value) {
@@ -18,7 +28,7 @@ var convertValue = function (value) {
     result = resultNumber;
   // Handle values containing newlines
   } else if (_.isString(result)) {
-    result = sanitize(result);
+    result = sanitizeValue(result);
   }
 
   return result;
@@ -48,7 +58,7 @@ var convertDecl = function (decl) {
 
 var convertRule = function (rule) {
   var returnObj = {};
-  var selector = sanitize(rule.selector);
+  var selector = sanitizeSelector(rule.selector);
 
   returnObj[selector] = _.transform(rule.nodes, function (convertedDecls, decl) {
     if (decl.type === 'decl') {
