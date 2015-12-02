@@ -2,7 +2,7 @@ var _ = require('lodash');
 var postcss = require('postcss');
 var camelCase = require('camelcase');
 
-var sanitizeSelector = function (selector) {
+var sanitize = function (selector) {
   return selector.replace(/\n/gi, ' ');
 };
 
@@ -16,6 +16,9 @@ var convertValue = function (value) {
   // Handle numeric values
   } else if (_.isNaN(resultNumber) === false) {
     result = resultNumber;
+  // Handle values containing newlines
+  } else if (_.isString(result)) {
+    result = sanitize(result);
   }
 
   return result;
@@ -45,7 +48,7 @@ var convertDecl = function (decl) {
 
 var convertRule = function (rule) {
   var returnObj = {};
-  var selector = sanitizeSelector(rule.selector);
+  var selector = sanitize(rule.selector);
 
   returnObj[selector] = _.transform(rule.nodes, function (convertedDecls, decl) {
     if (decl.type === 'decl') {
