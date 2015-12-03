@@ -80,15 +80,21 @@ var convertRule = function (rule) {
 };
 
 var convertMedia = function (media) {
-  var returnObj = { mediaQueries: {} };
-  returnObj.mediaQueries[media.params] = {};
+  var returnObj = {};
 
   _.forEach(media.nodes, function (node) {
     if (node.type !== 'rule') {
       return;
     }
 
-    _.merge(returnObj.mediaQueries[media.params], convertRule(node));
+    var convertedRule = _.reduce(convertRule(node), function (acc, rule, selector) {
+      acc[selector] = {};
+      acc[selector]['@media ' + media.params] = rule;
+
+      return acc;
+    }, {});
+
+    _.merge(returnObj, convertedRule);
   });
 
   return returnObj;
