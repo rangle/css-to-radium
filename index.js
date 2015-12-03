@@ -2,6 +2,8 @@ var _ = require('lodash');
 var postcss = require('postcss');
 var camelCase = require('camelcase');
 
+var pseudoInteractive = ['hover', 'active', 'focus'];
+
 var sanitize = function (str) {
   return str.replace(/\n/gi, ' ');
 };
@@ -70,13 +72,24 @@ var convertRule = function (rule) {
 
   // Split comma-combined selectors
   _.forEach(selector.split(','), function (sel) {
-    returnObj[sel] = _.transform(rule.nodes, function (convertedDecls, decl) {
+
+    var rules  = _.transform(rule.nodes, function (convertedDecls, decl) {
       if (decl.type === 'decl') {
         var convertedDecl = convertDecl(decl);
 
         convertedDecls[convertedDecl.property] = convertedDecl.value;
       }
-    }, {})
+    }, {});
+
+    // Handle pseudo-selectors
+    var pseudoParts = sel.split(':');
+    if (pseudoInteractive.indexOf(pseudoParts[1]) > -1) {
+
+      returnObj[pseudoParts[0]] = {};
+      returnObj[pseudoParts[0]][':' + pseudoParts[1]] = rules;
+    } else {
+      returnObj[sel] = rules;
+    }
   });
 
   return returnObj;
