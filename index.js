@@ -68,13 +68,16 @@ var convertRule = function (rule) {
   var returnObj = {};
   var selector = normalizeSelector(sanitizeSelector(rule.selector));
 
-  returnObj[selector] = _.transform(rule.nodes, function (convertedDecls, decl) {
-    if (decl.type === 'decl') {
-      var convertedDecl = convertDecl(decl);
+  // Split comma-combined selectors
+  _.forEach(selector.split(','), function (sel) {
+    returnObj[sel] = _.transform(rule.nodes, function (convertedDecls, decl) {
+      if (decl.type === 'decl') {
+        var convertedDecl = convertDecl(decl);
 
-      convertedDecls[convertedDecl.property] = convertedDecl.value;
-    }
-  }, {})
+        convertedDecls[convertedDecl.property] = convertedDecl.value;
+      }
+    }, {})
+  });
 
   return returnObj;
 };
